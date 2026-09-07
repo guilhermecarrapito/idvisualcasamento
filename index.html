@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compartilhe suas fotos do casamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #3d3733;
+    --ink-soft: #6e655e;
+    --cream: #faf6f0;
+    --card: #ffffff;
+    --accent: #9a7b4f;
+    --accent-dark: #7d6340;
+    --ok: #4a7c59;
+    --err: #a94438;
+    --line: #e8e0d5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    max-width: 480px;
+    width: 100%;
+    padding: 36px 28px;
+    box-shadow: 0 10px 30px rgba(61, 55, 51, 0.08);
+    text-align: center;
+  }
+  .ornament { font-size: 1.4rem; letter-spacing: 0.5em; color: var(--accent); margin-bottom: 12px; }
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .names {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--accent-dark);
+    margin-bottom: 20px;
+  }
+  .intro {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+  }
+  label.field-label {
+    display: block;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 2px 6px;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    background: #fffdfa;
+  }
+  input[type="text"]:focus { outline: 2px solid var(--accent); border-color: transparent; }
+
+  .drop {
+    border: 2px dashed var(--accent);
+    border-radius: 14px;
+    padding: 28px 16px;
+    cursor: pointer;
+    background: #fdfaf5;
+    transition: background 0.15s;
+    margin-bottom: 18px;
+  }
+  .drop:hover, .drop:active { background: #f7f1e7; }
+  .drop .icon { font-size: 2rem; margin-bottom: 8px; }
+  .drop p { font-size: 0.95rem; color: var(--ink-soft); line-height: 1.5; }
+  .drop p strong { color: var(--accent-dark); }
+  #fileInput { display: none; }
+
+  #fileList {
+    list-style: none;
+    text-align: left;
+    margin-bottom: 18px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  #fileList li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.85rem;
+  }
+  #fileList .fname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #fileList .fsize { color: var(--ink-soft); font-size: 0.75rem; }
+  #fileList .fstatus { font-size: 1rem; width: 22px; text-align: center; }
+  #fileList .remove {
+    border: none; background: none; color: var(--err);
+    font-size: 1rem; cursor: pointer; padding: 2px 6px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: var(--accent-dark); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .progress-wrap { display: none; margin-top: 18px; }
+  .progress-bar {
+    height: 10px;
+    background: var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.25s;
+  }
+  .progress-text { font-size: 0.85rem; color: var(--ink-soft); margin-top: 8px; }
+
+  .result { display: none; margin-top: 20px; padding: 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5; }
+  .result.ok { background: #edf5ef; color: var(--ok); display: block; }
+  .result.err { background: #faeceb; color: var(--err); display: block; }
+
+  .footer { margin-top: 24px; font-size: 0.75rem; color: var(--ink-soft); }
+
+  .setup-warning {
+    display: none;
+    background: #fff3cd;
+    color: #7a5d00;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="ornament">✦ ✦ ✦</div>
+  <h1 id="pageTitle">Nosso casamento pelos seus olhos</h1>
+  <div class="names" id="coupleNames"></div>
+  <p class="intro" id="introText"></p>
+
+  <div class="setup-warning" id="setupWarning">
+    ⚠️ <strong>Página ainda não configurada.</strong> Edite o arquivo
+    <code>index.html</code> e preencha o <code>scriptUrl</code> no bloco
+    <code>CONFIG</code> com a URL do seu Google Apps Script (veja o README).
+  </div>
+
+  <label class="field-label" for="guestName">Seu nome (opcional)</label>
+  <input type="text" id="guestName" placeholder="Para sabermos quem enviou 💛" maxlength="60">
+
+  <div class="drop" id="dropZone">
+    <div class="icon">📸</div>
+    <p><strong>Toque aqui</strong> para escolher<br>fotos e vídeos do seu celular</p>
+  </div>
+  <input type="file" id="fileInput" accept="image/*,video/*" multiple>
+
+  <ul id="fileList"></ul>
+
+  <button class="btn" id="sendBtn" disabled>Enviar foto(s) e/ou vídeo(s)</button>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <div class="footer">Feito com amor para o nosso grande dia 💍</div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURAÇÃO — edite apenas este bloco
+// ============================================================
+const CONFIG = {
+  // URL do app da web do Google Apps Script (termina em /exec).
+  // Veja o passo a passo no README.md do repositório.
+  scriptUrl: 'COLE_AQUI_A_URL_DO_APPS_SCRIPT',
+
+  // Nomes do casal, exibidos no topo da página.
+  coupleNames: 'Nome & Nome',
+
+  // Texto de estímulo exibido aos convidados.
+  introText: 'Cada clique seu guarda um pedacinho da nossa história. ' +
+             'Compartilhe com a gente as fotos e os vídeos que você fizer hoje — ' +
+             'queremos rever este dia também pelos seus olhos!',
+
+  // Tamanho máximo por arquivo, em MB (limite prático para vídeos longos).
+  maxFileSizeMB: 1024
+};
+// ============================================================
+
+const CHUNK_SIZE = 8 * 1024 * 1024; // 8 MB, múltiplo de 256 KB exigido pelo Drive
+const els = {
+  names: document.getElementById('coupleNames'),
+  intro: document.getElementById('introText'),
+  warning: document.getElementById('setupWarning'),
+  guestName: document.getElementById('guestName'),
+  drop: document.getElementById('dropZone'),
+  input: document.getElementById('fileInput'),
+  list: document.getElementById('fileList'),
+  send: document.getElementById('sendBtn'),
+  progressWrap: document.getElementById('progressWrap'),
+  progressFill: document.getElementById('progressFill'),
+  progressText: document.getElementById('progressText'),
+  result: document.getElementById('result')
+};
+
+const configured = CONFIG.scriptUrl.startsWith('https://');
+els.names.textContent = CONFIG.coupleNames;
+els.intro.textContent = CONFIG.introText;
+if (!configured) els.warning.style.display = 'block';
+
+let files = [];
+
+els.drop.addEventListener('click', () => els.input.click());
+els.input.addEventListener('change', () => {
+  for (const f of els.input.files) {
+    if (f.size > CONFIG.maxFileSizeMB * 1024 * 1024) {
+      alert('"' + f.name + '" passa do limite de ' + CONFIG.maxFileSizeMB + ' MB e não foi adicionado.');
+      continue;
+    }
+    files.push({ file: f, status: 'pending' });
+  }
+  els.input.value = '';
+  renderList();
+});
+
+function renderList() {
+  els.list.innerHTML = '';
+  files.forEach((item, i) => {
+    const li = document.createElement('li');
+    const icons = { pending: '🕓', sending: '⏫', done: '✅', error: '❌' };
+    const status = document.createElement('span');
+    status.className = 'fstatus';
+    status.textContent = icons[item.status];
+    const name = document.createElement('span');
+    name.className = 'fname';
+    name.textContent = item.file.name;
+    const size = document.createElement('span');
+    size.className = 'fsize';
+    size.textContent = fmtSize(item.file.size);
+    li.append(status, name, size);
+    if (item.status === 'pending') {
+      const rm = document.createElement('button');
+      rm.className = 'remove';
+      rm.textContent = '✕';
+      rm.setAttribute('aria-label', 'Remover');
+      rm.addEventListener('click', () => { files.splice(i, 1); renderList(); });
+      li.append(rm);
+    }
+    els.list.append(li);
+  });
+  els.send.disabled = !configured || !files.some(f => f.status === 'pending');
+}
+
+function fmtSize(bytes) {
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function buildFileName(original) {
+  const guest = els.guestName.value.trim()
+    .replace(/[\\/:*?"<>|#]/g, '')
+    .replace(/\s+/g, '-')
+    .slice(0, 40);
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const stamp = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+    '_' + pad(d.getHours()) + 'h' + pad(d.getMinutes());
+  return (guest ? guest + '_' : '') + stamp + '_' + original;
+}
+
+async function callScript(payload) {
+  // Content-Type text/plain evita preflight de CORS no Apps Script.
+  const res = await fetch(CONFIG.scriptUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || 'Erro no servidor');
+  return data;
+}
+
+function putChunk(uploadUrl, chunk, start, end, total, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', uploadUrl);
+    xhr.setRequestHeader('Content-Range', 'bytes ' + start + '-' + (end - 1) + '/' + total);
+    xhr.upload.onprogress = e => onProgress(start + e.loaded);
+    xhr.onload = () => {
+      // 308 = chunk aceito, continue; 200/201 = upload concluído.
+      if (xhr.status === 308 || xhr.status === 200 || xhr.status === 201) resolve(xhr.status);
+      else reject(new Error('Falha no envio (HTTP ' + xhr.status + ')'));
+    };
+    xhr.onerror = () => reject(new Error('Falha de rede durante o envio'));
+    xhr.send(chunk);
+  });
+}
+
+async function uploadResumable(item, onProgress) {
+  const f = item.file;
+  const init = await callScript({
+    action: 'initUpload',
+    name: buildFileName(f.name),
+    mimeType: f.type || 'application/octet-stream',
+    size: f.size
+  });
+  for (let start = 0; start < f.size; start += CHUNK_SIZE) {
+    const end = Math.min(start + CHUNK_SIZE, f.size);
+    await putChunk(init.uploadUrl, f.slice(start, end), start, end, f.size, onProgress);
+  }
+  if (f.size === 0) throw new Error('Arquivo vazio');
+}
+
+// Fallback para arquivos pequenos caso o envio direto ao Drive falhe
+// (ex.: rede que bloqueia googleapis.com). Limite ~30 MB por causa do
+// payload máximo do Apps Script com base64.
+async function uploadBase64(item, onProgress) {
+  const f = item.file;
+  if (f.size > 30 * 1024 * 1024) throw new Error('Arquivo grande demais para o envio alternativo');
+  const buf = await f.arrayBuffer();
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  const STEP = 0x8000;
+  for (let i = 0; i < bytes.length; i += STEP) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + STEP));
+  }
+  onProgress(f.size * 0.4);
+  await callScript({
+    action: 'directUpload',
+    name: buildFileName(f.name),
+    mimeType: f.type || 'application/octet-stream',
+    data: btoa(binary)
+  });
+  onProgress(f.size);
+}
+
+els.send.addEventListener('click', async () => {
+  const queue = files.filter(f => f.status === 'pending');
+  if (!queue.length) return;
+
+  els.send.disabled = true;
+  els.guestName.disabled = true;
+  els.result.className = 'result';
+  els.progressWrap.style.display = 'block';
+
+  const totalBytes = queue.reduce((s, f) => s + f.file.size, 0);
+  let doneBytes = 0;
+  let sent = 0, failed = 0;
+
+  for (const item of queue) {
+    item.status = 'sending';
+    renderList();
+    const base = doneBytes;
+    const onProgress = loaded => {
+      const pct = Math.min(100, ((base + loaded) / totalBytes) * 100);
+      els.progressFill.style.width = pct.toFixed(1) + '%';
+      els.progressText.textContent =
+        'Enviando ' + (sent + failed + 1) + ' de ' + queue.length + '… ' + pct.toFixed(0) + '%';
+    };
+    try {
+      try {
+        await uploadResumable(item, onProgress);
+      } catch (err) {
+        console.warn('Envio direto falhou, tentando alternativo:', err);
+        await uploadBase64(item, onProgress);
+      }
+      item.status = 'done';
+      sent++;
+    } catch (err) {
+      console.error(err);
+      item.status = 'error';
+      failed++;
+    }
+    doneBytes += item.file.size;
+    renderList();
+  }
+
+  els.progressWrap.style.display = 'none';
+  els.guestName.disabled = false;
+  if (failed === 0) {
+    els.result.className = 'result ok';
+    els.result.textContent = '💛 Recebemos ' + sent + (sent === 1 ? ' arquivo' : ' arquivos') +
+      '! Muito obrigado por compartilhar esse momento com a gente.';
+  } else {
+    els.result.className = 'result err';
+    els.result.textContent = sent + ' enviado(s), ' + failed + ' com erro. ' +
+      'Verifique sua conexão e toque em enviar novamente — só os pendentes serão reenviados.';
+    files.filter(f => f.status === 'error').forEach(f => { f.status = 'pending'; });
+    renderList();
+  }
+  els.send.disabled = !files.some(f => f.status === 'pending');
+});
+</script>
+</body>
+</html>

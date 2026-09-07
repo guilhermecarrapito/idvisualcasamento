@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de QR Code — Fotos do Casamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', system-ui, sans-serif;
+    background: #faf6f0;
+    color: #3d3733;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+  .panel {
+    background: #fff;
+    border: 1px solid #e8e0d5;
+    border-radius: 18px;
+    padding: 28px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; margin-bottom: 14px; }
+  p.hint { font-size: 0.85rem; color: #6e655e; line-height: 1.5; margin-bottom: 16px; }
+  input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e8e0d5;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+  button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    background: #9a7b4f;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: #7d6340; }
+
+  .print-card {
+    background: #fff;
+    border: 1px solid #e8e0d5;
+    border-radius: 18px;
+    padding: 40px 32px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+  }
+  .print-card .ornament { color: #9a7b4f; letter-spacing: 0.5em; margin-bottom: 10px; }
+  .print-card h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; margin-bottom: 6px; }
+  .print-card p { font-size: 0.9rem; color: #6e655e; margin-bottom: 22px; line-height: 1.5; }
+  #qrcode { display: flex; justify-content: center; margin-bottom: 18px; }
+  #qrcode img, #qrcode canvas { border: 12px solid #fff; }
+  .url-label { font-size: 0.75rem; color: #6e655e; word-break: break-all; }
+
+  @media print {
+    body { background: #fff; }
+    .panel, .no-print { display: none; }
+    .print-card { border: none; }
+  }
+</style>
+</head>
+<body>
+<div class="panel">
+  <h1>Gerador de QR Code</h1>
+  <p class="hint">Cole abaixo a URL pública da página de upload (por exemplo, a URL do
+  GitHub Pages) e gere o QR Code. Depois use <strong>Ctrl+P / Imprimir</strong> —
+  só o cartão com o QR será impresso.</p>
+  <input type="url" id="urlInput" placeholder="https://seuusuario.github.io/idvisualcasamento/">
+  <button id="genBtn">Gerar QR Code</button>
+</div>
+
+<div class="print-card" id="printCard" style="display:none">
+  <div class="ornament">✦ ✦ ✦</div>
+  <h2>Compartilhe suas fotos!</h2>
+  <p>Aponte a câmera do celular para o código<br>e envie suas fotos e vídeos de hoje 📸</p>
+  <div id="qrcode"></div>
+  <div class="url-label" id="urlLabel"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  const input = document.getElementById('urlInput');
+  const card = document.getElementById('printCard');
+  const qrDiv = document.getElementById('qrcode');
+
+  // Pré-preenche com a URL provável do GitHub Pages deste repositório.
+  if (location.protocol.startsWith('http')) {
+    input.value = location.href.replace(/qr\.html.*$/, '');
+  }
+
+  document.getElementById('genBtn').addEventListener('click', () => {
+    const url = input.value.trim();
+    if (!url.startsWith('http')) { alert('Cole uma URL válida (começando com https://)'); return; }
+    qrDiv.innerHTML = '';
+    new QRCode(qrDiv, { text: url, width: 260, height: 260, correctLevel: QRCode.CorrectLevel.M });
+    document.getElementById('urlLabel').textContent = url;
+    card.style.display = 'block';
+  });
+</script>
+</body>
+</html>
