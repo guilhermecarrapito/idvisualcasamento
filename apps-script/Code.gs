@@ -33,8 +33,13 @@ function doPost(e) {
 }
 
 // Verificação rápida: abra a URL /exec no navegador e deve aparecer {"ok":true,...}
+// Também mostra com qual conta o script roda e se essa conta enxerga a pasta.
 function doGet() {
-  return json_({ ok: true, service: 'upload-casamento', folderConfigured: FOLDER_ID.indexOf('COLE_AQUI') === -1 });
+  var out = { ok: true, service: 'upload-casamento', folderConfigured: FOLDER_ID.indexOf('COLE_AQUI') === -1 };
+  try { out.account = DriveApp.getRootFolder().getOwner().getEmail(); } catch (err) { out.account = 'desconhecida'; }
+  try { out.folderName = DriveApp.getFolderById(FOLDER_ID).getName(); out.folderOk = true; }
+  catch (err) { out.folderOk = false; out.folderError = String(err); }
+  return json_(out);
 }
 
 /**
