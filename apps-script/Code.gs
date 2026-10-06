@@ -52,13 +52,16 @@ function initUpload_(req) {
       headers: {
         Authorization: 'Bearer ' + ScriptApp.getOAuthToken(),
         'X-Upload-Content-Type': String(req.mimeType || 'application/octet-stream'),
-        'X-Upload-Content-Length': String(req.size || 0)
+        'X-Upload-Content-Length': String(req.size || 0),
+        // Sem o Origin, a URL de sessão não devolve cabeçalhos CORS e o
+        // navegador do convidado bloqueia o envio dos pedaços.
+        Origin: String(req.origin || 'https://guilhermecarrapito.github.io')
       },
       muteHttpExceptions: true
     }
   );
   if (res.getResponseCode() >= 300) {
-    return json_({ ok: false, error: 'Falha ao iniciar upload: HTTP ' + res.getResponseCode() });
+    return json_({ ok: false, error: 'Falha ao iniciar upload: HTTP ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 300) });
   }
   var headers = res.getAllHeaders();
   var uploadUrl = headers['Location'] || headers['location'];

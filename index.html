@@ -345,7 +345,8 @@ async function uploadResumable(item, onProgress) {
     action: 'initUpload',
     name: buildFileName(f.name),
     mimeType: f.type || 'application/octet-stream',
-    size: f.size
+    size: f.size,
+    origin: location.origin
   });
   for (let start = 0; start < f.size; start += CHUNK_SIZE) {
     const end = Math.min(start + CHUNK_SIZE, f.size);
@@ -405,12 +406,14 @@ els.send.addEventListener('click', async () => {
         await uploadResumable(item, onProgress);
       } catch (err) {
         console.warn('Envio direto falhou, tentando alternativo:', err);
+        item.firstError = err.message;
         await uploadBase64(item, onProgress);
       }
       item.status = 'done';
       sent++;
     } catch (err) {
       console.error(err);
+      item.lastError = (item.firstError ? item.firstError + ' / ' : '') + err.message;
       item.status = 'error';
       failed++;
     }
@@ -428,6 +431,13 @@ els.send.addEventListener('click', async () => {
     els.result.className = 'result err';
     els.result.textContent = sent + ' enviado(s), ' + failed + ' com erro. ' +
       'Verifique sua conexão e toque em enviar novamente — só os pendentes serão reenviados.';
+    const detail = files.find(f => f.status === 'error' && f.lastError);
+    if (detail) {
+      const small = document.createElement('small');
+      small.style.cssText = 'display:block;margin-top:8px;opacity:.7;word-break:break-word';
+      small.textContent = 'Detalhe técnico: ' + detail.lastError;
+      els.result.append(small);
+    }
     files.filter(f => f.status === 'error').forEach(f => { f.status = 'pending'; });
     renderList();
   }
