@@ -75,7 +75,7 @@ Faça commit e push da alteração.
 
 1. No GitHub, abra **Settings → Pages** do repositório.
 2. Em *Source*, escolha **Deploy from a branch**, selecione a branch
-   principal e a pasta `/ (root)`. Salve.
+   `gh-pages` e a pasta `/ (root)`. Salve.
 3. Em ~1 minuto a página fica disponível em
    `https://SEU_USUARIO.github.io/idvisualcasamento/`.
 4. Abra no celular e faça um envio de teste — o arquivo deve aparecer na

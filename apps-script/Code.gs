@@ -17,7 +17,7 @@
  * script com a sua permissão.
  */
 
-var FOLDER_ID = 'COLE_AQUI_O_ID_DA_PASTA_DO_DRIVE';
+var FOLDER_ID = '1RdA4DlmXYqF68ufyiRdznc7fo41Z4Fal';
 
 function doPost(e) {
   try {
