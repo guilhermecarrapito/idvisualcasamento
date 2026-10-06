@@ -22,10 +22,12 @@ var FOLDER_ID = '1RdA4DlmXYqF68ufyiRdznc7fo41Z4Fal';
 function doPost(e) {
   try {
     var req = JSON.parse(e.postData.contents);
+    console.log('Ação: ' + req.action + ' | arquivo: ' + req.name + ' | tamanho: ' + req.size + ' | origem: ' + req.origin);
     if (req.action === 'initUpload') return initUpload_(req);
     if (req.action === 'directUpload') return directUpload_(req);
     return json_({ ok: false, error: 'Ação desconhecida' });
   } catch (err) {
+    console.error('ERRO: ' + err + (err && err.stack ? '\n' + err.stack : ''));
     return json_({ ok: false, error: String(err) });
   }
 }
@@ -60,7 +62,9 @@ function initUpload_(req) {
       muteHttpExceptions: true
     }
   );
+  console.log('Drive respondeu HTTP ' + res.getResponseCode());
   if (res.getResponseCode() >= 300) {
+    console.error('Falha ao iniciar upload: ' + res.getContentText().slice(0, 500));
     return json_({ ok: false, error: 'Falha ao iniciar upload: HTTP ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 300) });
   }
   var headers = res.getAllHeaders();
